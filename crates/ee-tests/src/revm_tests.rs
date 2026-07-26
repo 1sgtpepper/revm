@@ -35,7 +35,7 @@ fn raw_delegation_indicator_is_legacy_before_prague() {
 
     assert!(
         matches!(
-            result,
+            &result,
             revm::context_interface::result::ExecutionResult::Halt {
                 reason: revm::context_interface::result::HaltReason::InvalidFEOpcode,
                 ..
