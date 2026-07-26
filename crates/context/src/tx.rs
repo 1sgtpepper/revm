@@ -975,7 +975,7 @@ mod tests {
     }
 
     #[test]
-    fn test_tx_env_builder_build_fill_prefers_blob_type_over_priority_fee() {
+    fn test_tx_env_builder_build_fill_blob_call_prefers_eip4844_over_eip1559() {
         let tx = TxEnvBuilder::new()
             .gas_priority_fee(Some(1))
             .blob_hashes(vec![B256::from([5u8; 32])])
@@ -997,7 +997,7 @@ mod tests {
     }
 
     #[test]
-    fn test_tx_env_builder_build_fill_prefers_blob_type_after_repairing_target() {
+    fn test_tx_env_builder_build_fill_create_blob_fields_derive_eip4844_after_repairing_target() {
         let tx = TxEnvBuilder::new()
             .gas_priority_fee(Some(1))
             .blob_hashes(vec![B256::from([5u8; 32])])
