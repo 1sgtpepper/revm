@@ -975,6 +975,40 @@ mod tests {
     }
 
     #[test]
+    fn test_tx_env_builder_build_fill_blob_call_prefers_eip4844_over_eip1559() {
+        let tx = TxEnvBuilder::new()
+            .gas_priority_fee(Some(1))
+            .blob_hashes(vec![B256::from([5u8; 32])])
+            .kind(TxKind::Call(Address::from([2u8; 20])))
+            .build_fill();
+
+        assert_eq!(tx.tx_type, TransactionType::Eip4844);
+    }
+
+    #[test]
+    fn test_tx_env_builder_build_fill_derives_eip4844_after_filling_target() {
+        let tx = TxEnvBuilder::new()
+            .blob_hashes(vec![B256::from([5u8; 32])])
+            .kind(TxKind::Create)
+            .build_fill();
+
+        assert_eq!(tx.kind, TxKind::Call(Address::default()));
+        assert_eq!(tx.tx_type, TransactionType::Eip4844);
+    }
+
+    #[test]
+    fn test_tx_env_builder_build_fill_create_blob_fields_derive_eip4844_after_repairing_target() {
+        let tx = TxEnvBuilder::new()
+            .gas_priority_fee(Some(1))
+            .blob_hashes(vec![B256::from([5u8; 32])])
+            .kind(TxKind::Create)
+            .build_fill();
+
+        assert_eq!(tx.kind, TxKind::Call(Address::default()));
+        assert_eq!(tx.tx_type, TransactionType::Eip4844);
+    }
+
+    #[test]
     fn test_tx_env_builder_build_fill_eip7702_missing_auth_list() {
         // EIP-7702 without authorization list should add dummy auth
         let tx = TxEnvBuilder::new()
