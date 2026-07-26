@@ -33,14 +33,16 @@ fn raw_delegation_indicator_is_legacy_before_prague() {
         .transact_one(TxEnv::builder_for_bench().build_fill())
         .unwrap();
 
-    assert!(matches!(
-        result,
-        revm::context_interface::result::ExecutionResult::Halt {
-            reason: revm::context_interface::result::HaltReason::InvalidFEOpcode,
-            ..
-        },
+    assert!(
+        matches!(
+            result,
+            revm::context_interface::result::ExecutionResult::Halt {
+                reason: revm::context_interface::result::HaltReason::InvalidFEOpcode,
+                ..
+            }
+        ),
         "pre-Prague legacy bytecode executed as {result:?}"
-    ));
+    );
 }
 
 #[test]
