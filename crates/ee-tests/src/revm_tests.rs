@@ -18,6 +18,59 @@ const SELFDESTRUCT_BYTECODE: &[u8] = &[
 ];
 
 #[test]
+fn raw_delegation_indicator_executes_at_prague() {
+    let mut raw = [0; 23];
+    raw[..3].copy_from_slice(&[0xef, 0x01, 0x00]);
+
+    let mut evm = Context::mainnet()
+        .with_cfg(CfgEnv::new_with_spec(SpecId::PRAGUE))
+        .with_db(BenchmarkDB::new_bytecode(Bytecode::new_raw(
+            Bytes::copy_from_slice(&raw),
+        )))
+        .build_mainnet();
+
+    let result = evm
+        .transact_one(TxEnv::builder_for_bench().build_fill())
+        .unwrap();
+
+    assert!(
+        matches!(
+            &result,
+            revm::context_interface::result::ExecutionResult::Success { .. }
+        ),
+        "Prague delegation indicator did not execute as {result:?}"
+    );
+}
+
+#[test]
+fn raw_delegation_indicator_is_legacy_before_prague() {
+    let mut raw = [0; 23];
+    raw[..3].copy_from_slice(&[0xef, 0x01, 0x00]);
+
+    let mut evm = Context::mainnet()
+        .with_cfg(CfgEnv::new_with_spec(SpecId::BERLIN))
+        .with_db(BenchmarkDB::new_bytecode(Bytecode::new_raw(
+            Bytes::copy_from_slice(&raw),
+        )))
+        .build_mainnet();
+
+    let result = evm
+        .transact_one(TxEnv::builder_for_bench().build_fill())
+        .unwrap();
+
+    assert!(
+        matches!(
+            &result,
+            revm::context_interface::result::ExecutionResult::Halt {
+                reason: revm::context_interface::result::HaltReason::InvalidFEOpcode,
+                ..
+            }
+        ),
+        "pre-Prague legacy bytecode executed as {result:?}"
+    );
+}
+
+#[test]
 fn test_selfdestruct_multi_tx() {
     let mut evm = Context::mainnet()
         .with_cfg(CfgEnv::new_with_spec(SpecId::BERLIN))
