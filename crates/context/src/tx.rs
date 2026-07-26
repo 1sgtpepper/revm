@@ -975,8 +975,31 @@ mod tests {
     }
 
     #[test]
+    fn test_tx_env_builder_build_fill_prefers_blob_type_over_priority_fee() {
+        let tx = TxEnvBuilder::new()
+            .gas_priority_fee(Some(1))
+            .blob_hashes(vec![B256::from([5u8; 32])])
+            .kind(TxKind::Call(Address::from([2u8; 20])))
+            .build_fill();
+
+        assert_eq!(tx.tx_type, TransactionType::Eip4844);
+    }
+
+    #[test]
     fn test_tx_env_builder_build_fill_derives_eip4844_after_filling_target() {
         let tx = TxEnvBuilder::new()
+            .blob_hashes(vec![B256::from([5u8; 32])])
+            .kind(TxKind::Create)
+            .build_fill();
+
+        assert_eq!(tx.kind, TxKind::Call(Address::default()));
+        assert_eq!(tx.tx_type, TransactionType::Eip4844);
+    }
+
+    #[test]
+    fn test_tx_env_builder_build_fill_prefers_blob_type_after_repairing_target() {
+        let tx = TxEnvBuilder::new()
+            .gas_priority_fee(Some(1))
             .blob_hashes(vec![B256::from([5u8; 32])])
             .kind(TxKind::Create)
             .build_fill();
